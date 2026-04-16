@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users/{userId}/transactions
+    // Document ID: auto-generated
+    // Fields:
+    //   - type: string (required, 'receipt' or 'expense')
+    //   - date: string (required, YYYY-MM-DD)
+    //   - amount: number (required, positive)
+    //   - particulars: string (required, max 500 chars)
+    //   - department: string (optional)
+    //   - voucherNo: string (optional)
+    //   - enteredBy: string (optional)
+    //   - remarks: string (optional, max 1000 chars)
+    //   - hours: number (optional)
+    //   - minutes: number (optional)
+    //   - sessions: list (optional)
+    //   - userId: string (required, matches auth.uid)
+    //   - createdAt: number (required)
+    //
+    // Collection: users/{userId}/settings
+    // Document ID: 'app'
+    // Fields:
+    //   - departments: list (optional)
+    //   - machineryTypes: list (optional)
+    //   - googleSheetUrl: string (optional)
+    //   - enteredBy: string (optional)
+    //   - openingBalanceConfig: map (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    function isPositive(val) {
+      return val is number && val >= 0;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['type', 'date', 'amount', 'particulars', 'userId', 'createdAt']) &&
+             data.type in ['receipt', 'expense'] &&
+             isValidDateString(data.date) &&
+             isPositive(data.amount) &&
+             data.particulars is string && data.particulars.size() <= 500 &&
+             data.userId == request.auth.uid &&
+             data.createdAt is number;
+    }
+
+    function isValidSettings(data) {
+      return (!('departments' in data) || data.departments is list) &&
+             (!('machineryTypes' in data) || data.machineryTypes is list) &&
+             (!('googleSheetUrl' in data) || data.googleSheetUrl is string) &&
+             (!('enteredBy' in data) || data.enteredBy is string) &&
+             (!('openingBalanceConfig' in data) || data.openingBalanceConfig is map);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransaction(request.resource.data);
+        allow update: if isOwner(userId) && isValidTransaction(request.resource.data) && 
+                         request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwner(userId);
+      }
+
+      match /settings/{settingId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && isValidSettings(request.resource.data);
+      }
+    }
+
+    // Admin check (using the user email provided in context)
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)/settings/app).data.role == 'admin' ||
+          (request.auth.token.email == "adyy462@gmail.com" && request.auth.token.email_verified == true));
+    }
+  }
+}

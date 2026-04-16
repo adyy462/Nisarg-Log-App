@@ -1,0 +1,132 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Marathi:wght@100..900&display=swap');
+
+@theme {
+  --font-sans: "Noto Sans Marathi", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-muted: #64748b;
+  --color-accent: #10b981;
+  --color-danger: #ef4444;
+  --color-border: #e2e8f0;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-ink font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Theme Specific Classes */
+.card {
+  @apply bg-surface rounded-[24px] border border-border p-6 shadow-sm flex flex-col;
+}
+
+.section-title {
+  @apply text-[10px] uppercase tracking-[1.5px] text-ink-muted font-extrabold mb-4 flex justify-between;
+}
+
+.balance-card {
+  @apply bg-ink text-white mb-6 relative overflow-hidden;
+}
+
+.balance-card::after {
+  content: '';
+  @apply absolute -top-[50px] -right-[50px] w-[150px] h-[150px] bg-accent opacity-10 rounded-full;
+}
+
+.amount-large {
+  @apply text-[38px] font-extrabold tracking-[-1px] mt-1;
+}
+
+.stat-row {
+  @apply flex justify-between items-center py-3 border-b border-border last:border-b-0;
+}
+
+.stat-label {
+  @apply text-sm font-semibold text-ink-muted;
+}
+
+.stat-value {
+  @apply text-sm font-extrabold;
+}
+
+.ai-box {
+  @apply bg-[#eef2ff] border border-[#c7d2fe] text-[#3730a3] rounded-2xl p-4 text-[13px] leading-relaxed font-semibold;
+}
+
+.tag {
+  @apply px-2 py-1 rounded-md text-[10px] font-extrabold bg-bg border border-border uppercase;
+}
+
+.data-table {
+  @apply w-full border-collapse;
+}
+
+.data-table th {
+  @apply text-left text-[11px] uppercase text-ink-muted px-4 py-3 border-b-2 border-border;
+}
+
+.data-table td {
+  @apply p-4 text-[13px] font-semibold border-b border-border;
+}
+
+.btn {
+  @apply px-4 py-3 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all active:scale-95 text-center;
+}
+
+.btn-primary {
+  @apply bg-ink text-white shadow-md;
+}
+
+.btn-outline {
+  @apply border border-border text-ink bg-white shadow-sm;
+}
+
+.btn-danger {
+  @apply bg-danger text-white shadow-md;
+}
+
+/* Print Specific CSS */
+@media print {
+  body {
+    background-color: white !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .shadow-2xl, .shadow-xl, .shadow-lg, .shadow-sm {
+    box-shadow: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  table {
+    width: 100% !important;
+    border: 1px solid #000 !important;
+  }
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 8px !important;
+    color: #000 !important;
+  }
+}

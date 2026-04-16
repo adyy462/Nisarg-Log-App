@@ -1,0 +1,115 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction (receipt or expense) for the resort.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["receipt", "expense"],
+          "description": "The type of transaction."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the transaction (YYYY-MM-DD)."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the transaction."
+        },
+        "particulars": {
+          "type": "string",
+          "description": "Details about the transaction."
+        },
+        "department": {
+          "type": "string",
+          "description": "The department associated with the transaction."
+        },
+        "voucherNo": {
+          "type": "string",
+          "description": "Optional voucher number."
+        },
+        "enteredBy": {
+          "type": "string",
+          "description": "Name of the person who entered the record."
+        },
+        "remarks": {
+          "type": "string",
+          "description": "Additional notes."
+        },
+        "hours": {
+          "type": "number",
+          "description": "Total hours for machinery tracking."
+        },
+        "minutes": {
+          "type": "number",
+          "description": "Total minutes for machinery tracking."
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hours": { "type": "string" },
+              "minutes": { "type": "string" }
+            }
+          },
+          "description": "Individual work sessions for machinery."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this transaction."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp of creation."
+        }
+      },
+      "required": ["type", "date", "amount", "particulars", "userId", "createdAt"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "User-specific application settings.",
+      "type": "object",
+      "properties": {
+        "departments": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of available departments."
+        },
+        "machineryTypes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of departments that are machinery and require time tracking."
+        },
+        "googleSheetUrl": {
+          "type": "string",
+          "description": "URL for the Google Apps Script sync."
+        },
+        "enteredBy": {
+          "type": "string",
+          "description": "Default name for the user."
+        },
+        "openingBalanceConfig": {
+          "type": "object",
+          "properties": {
+            "amount": { "type": "number" },
+            "date": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Collection of transactions for a specific user."
+    },
+    "users/{userId}/settings/app": {
+      "schema": "Settings",
+      "description": "App settings for a specific user."
+    }
+  }
+}
